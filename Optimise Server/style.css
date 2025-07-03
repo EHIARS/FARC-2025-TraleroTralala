@@ -1,0 +1,41 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  background: #f9f9f9;
+}
+
+h2 {
+  text-align: center;
+}
+
+label {
+  display: inline-block;
+  width: 200px;
+}
+
+input {
+  width: 100px;
+  margin-bottom: 8px;
+}
+
+.param-group {
+  margin-bottom: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  margin-top: 10px;
+}
+
+#status {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+canvas {
+  margin-top: 30px;
+  background: white;
+  border: 1px solid #ccc;
+}
