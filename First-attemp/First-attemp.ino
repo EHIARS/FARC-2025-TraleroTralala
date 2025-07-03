@@ -215,6 +215,7 @@ void loop(){
 int motor1[2] = {8, 9};
 int motor2[2] = {10, 11};
 int motor3[2] = {12, 13};
+int motor4[2] = {14,15};
 
 PS2X ps2x;
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
