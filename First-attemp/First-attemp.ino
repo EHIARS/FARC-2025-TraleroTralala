@@ -282,7 +282,7 @@ void readGamePad() {
   }
   if (ps2x.Button(PSB_PAD_UP) || ps2x.Button(PSB_PAD_DOWN)){
     slider = 128 * speedScale;
-    slider = limitInput(slider,speedScale)
+    slider = limitInput(slider,speedScale);
     lx = 0;
     ly = 0;
     rx = 0;
