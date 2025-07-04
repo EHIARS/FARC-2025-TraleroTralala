@@ -253,5 +253,6 @@ void loop() {
   ps2x.read_gamepad();
   readGamePad();
   controlMotor();
+  controlServo();
   delay(50);
 }
