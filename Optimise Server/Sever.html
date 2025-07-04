@@ -1,31 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>ESP32 Omniwheel Control Panel</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
 </head>
 <body>
-
-<h2>ESP32 Control Panel</h2>
-
-<div class="param-group">
-  <label>speedScale</label><input type="number" id="speedScale" step="0.01"><br>
-  <label>maxSpeedScale</label><input type="number" id="maxSpeedScale" step="0.01"><br>
-  <label>rampUpStep</label><input type="number" id="rampUpStep" step="0.01"><br>
-  <label>rampDownStep</label><input type="number" id="rampDownStep" step="0.01"><br>
-  <label>rampDownFastStep</label><input type="number" id="rampDownFastStep" step="0.01"><br>
-  <label>rampInterval (ms)</label><input type="number" id="rampInterval" step="1"><br>
-  <label>sinr</label><input type="number" id="sinr" step="0.0001"><br>
-  <label>cosr</label><input type="number" id="cosr" step="0.0001"><br>
+<div id="network-help" style="display: none; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+  <h3>Connection Troubleshooting</h3>
+  <p id="network-status">Checking network...</p>
+  <ul id="network-tips"></ul>
 </div>
 
-<button onclick="send()">✅ Send to ESP32</button>
-<div id="status">Status: Waiting...</div>
+<script>
+function showNetworkHelp() {
+  const helpDiv = document.getElementById('network-help');
+  helpDiv.style.display = 'block';
+  
+  const statusElem = document.getElementById('network-status');
+  const tipsList = document.getElementById('network-tips');
+  
+  // Clear previous tips
+  tipsList.innerHTML = '';
+  
+  // Add troubleshooting tips
+  const tips = [
+    "1. Ensure ESP32 is powered on",
+    "2. Check if 'ESP32_Config' WiFi network is available",
+    "3. Try connecting to 192.168.4.1 directly in your browser",
+    "4. Verify your computer is on the same network",
+    "5. Restart both ESP32 and your computer"
+  ];
+  
+  tips.forEach(tip => {
+    const li = document.createElement('li');
+    li.textContent = tip;
+    tipsList.appendChild(li);
+  });
+}
 
-<canvas id="chart" width="700" height="300"></canvas>
-<canvas id="chart2" width="700" height="300"></canvas>
-<script src="script.js"></script>
+// Call this when connection fails
+function handleConnectionFailure() {
+  showNetworkHelp();
+  updateStatus("❌ Connection failed - see troubleshooting tips below", true);
+}
+</script>
+  <h2>ESP32 Control Panel</h2>
+
+  <div id="error-display"></div>
+
+  <div class="param-group">
+    <div class="param-row">
+      <label for="speedScale" class="param-label">Speed Scale:</label>
+      <input type="range" id="speedScale" min="0" max="2" step="0.01" value="1.0" class="param-slider">
+      <input type="number" id="speedScale-value" step="0.01" value="1.0" class="param-value">
+      <span class="param-unit">(0-2)</span>
+    </div>
+
+    <div class="param-row">
+      <label for="maxSpeedScale" class="param-label">Max Speed Scale:</label>
+      <input type="range" id="maxSpeedScale" min="1" max="2" step="0.1" value="2.0" class="param-slider">
+      <input type="number" id="maxSpeedScale-value" step="0.1" value="2.0" class="param-value">
+      <span class="param-unit">(1-2)</span>
+    </div>
+
+    <div class="param-row">
+      <label for="rampUpStep" class="param-label">Ramp Up Step:</label>
+      <input type="range" id="rampUpStep" min="0.01" max="0.2" step="0.01" value="0.05" class="param-slider">
+      <input type="number" id="rampUpStep-value" step="0.01" value="0.05" class="param-value">
+      <span class="param-unit">(0.01-0.2)</span>
+    </div>
+
+    <div class="param-row">
+      <label for="rampDownStep" class="param-label">Ramp Down Step:</label>
+      <input type="range" id="rampDownStep" min="0.01" max="0.2" step="0.01" value="0.03" class="param-slider">
+      <input type="number" id="rampDownStep-value" step="0.01" value="0.03" class="param-value">
+      <span class="param-unit">(0.01-0.2)</span>
+    </div>
+
+    <div class="param-row">
+      <label for="rampDownFastStep" class="param-label">Fast Ramp Down:</label>
+      <input type="range" id="rampDownFastStep" min="0.05" max="0.5" step="0.01" value="0.1" class="param-slider">
+      <input type="number" id="rampDownFastStep-value" step="0.01" value="0.1" class="param-value">
+      <span class="param-unit">(0.05-0.5)</span>
+    </div>
+
+    <div class="param-row">
+      <label for="rampInterval" class="param-label">Ramp Interval:</label>
+      <input type="range" id="rampInterval" min="10" max="500" step="10" value="50" class="param-slider">
+      <input type="number" id="rampInterval-value" step="10" value="50" class="param-value">
+      <span class="param-unit">ms (10-500)</span>
+    </div>
+
+    <div class="param-row">
+      <label for="sinr" class="param-label">Sin(r):</label>
+      <input type="range" id="sinr" min="-1" max="1" step="0.0001" value="0.8660" class="param-slider">
+      <input type="number" id="sinr-value" step="0.0001" value="0.8660" class="param-value">
+      <span class="param-unit">(-1 to 1)</span>
+    </div>
+
+    <div class="param-row">
+      <label for="cosr" class="param-label">Cos(r):</label>
+      <input type="range" id="cosr" min="-1" max="1" step="0.0001" value="0.5" class="param-slider">
+      <input type="number" id="cosr-value" step="0.0001" value="0.5" class="param-value">
+      <span class="param-unit">(-1 to 1)</span>
+    </div>
+  </div>
+
+  <button id="sendButton">✅ Send to ESP32</button>
+  <div id="status">Status: Initializing...</div>
+
+  <canvas id="chart" width="700" height="300"></canvas>
+
+  <script>
+    // Global error handler
+    window.addEventListener('error', function(e) {
+      const errorElem = document.getElementById('error-display');
+      errorElem.style.display = 'block';
+      errorElem.innerText = `Error: ${e.message}`;
+      console.error(e);
+    });
+  </script>
 </body>
 </html>
