@@ -59,4 +59,4 @@ Dự án này sử dụng tay cầm PS2 để điều khiển một robot sử d
 
 ---
 
-> *Developed with 💙 by [YourName]*
+> *Developed with 💙 by [LHP TRALALERO TRALALA]*
