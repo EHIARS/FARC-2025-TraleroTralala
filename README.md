@@ -17,10 +17,10 @@ Dự án này sử dụng tay cầm PS2 để điều khiển một robot sử d
 |                         | Đổi hướng joystick       | `speedScale -= 0.2` | Giảm tốc nhẹ khi đổi hướng đột ngột                                 |
 | **Robot di chuyển**     | Analog: `LX`, `LY`, `RX` | `lx`, `ly`, `rx`    | Điều khiển hướng di chuyển + quay vòng                              |
 |                         |                          | `m1`, `m2`, `m3`    | Tính toán tốc độ cho từng motor (omni wheel)                        |
-| **Servo 1**             | `△ (PINK)`               | `servo1 = 1`        | Quay thuận chiều kim đồng hồ (PWM = `CW`)                           |
+| **Servo thả banh**      | `△ (PINK)`               | `servo1 = 1`        | Quay thuận chiều kim đồng hồ (PWM = `CW`)                           |
 |                         | `☐ (GREEN)`              | `servo1 = -1`       | Quay ngược chiều kim đồng hồ (PWM = `CCW`)                          |
 |                         | Không nhấn               | `servo1 = 0`        | Dừng servo 1 (PWM = `MAX_PWM / 2`)                                  |
-| **Servo 2**             | `✖ (BLUE)`               | `servo2 = 1`        | Quay thuận chiều kim đồng hồ                                        |
+| **Servo thả nông sảng** | `✖ (BLUE)`               | `servo2 = 1`        | Quay thuận chiều kim đồng hồ                                        |
 |                         | `○ (RED)`                | `servo2 = -1`       | Quay ngược chiều kim đồng hồ                                        |
 |                         | Không nhấn               | `servo2 = 0`        | Dừng servo 2                                                        |
 
