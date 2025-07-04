@@ -232,7 +232,7 @@ float sinr = 0.86602540378;
 float cosr = 0.5;
 unsigned long lastSpeedUpdate = 0;
 float m1 = 0.0, m2 = 0.0, m3 = 0.0;
-int lx = 0, ly = 0, rx = 0, slider = 0;
+int lx = 0, ly = 0, rx = 0, slider = 0, servo1 =0, servo2 = 0;
 void setup() {
   Serial.begin(115200);
   

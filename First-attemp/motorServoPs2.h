@@ -23,6 +23,8 @@
 #define PS2_CLK 14
 #define MAX_PWM 4059
 
+#define CCW 3045
+#define CW 1015
 // Declare variables as extern (they will be defined in a .cpp file)
 extern int motor1[2];
 extern int motor2[2]; 
@@ -42,7 +44,7 @@ extern float sinr;
 extern float cosr;
 extern unsigned long lastSpeedUpdate;
 extern float m1, m2, m3;
-extern int lx, ly, rx, slider;
+extern int lx, ly, rx, slider, servo1, servo2;
 
 
 int flattenAnalog(int value, int threshold = 10) {
@@ -81,18 +83,19 @@ void updateSpeedScale() {
 }
 
 void readGamePad() {
-  updateSpeedScale();  
-  if (ps2x.ButtonReleased(PSB_PAD_UP) || ps2x.ButtonReleased(PSB_PAD_DOWN)){
+  if (!ps2x.Button(PSB_PAD_UP) && !ps2x.Button(PSB_PAD_DOWN)){
     slider = 0;
     pwm.setPin(motor4[0], 0);
     pwm.setPin(motor4[1], 0);
   }
-  if (ps2x.Button(PSB_PAD_UP) || ps2x.Button(PSB_PAD_DOWN)){
+  else if (ps2x.Button(PSB_PAD_UP) || ps2x.Button(PSB_PAD_DOWN)){
     if (ps2x.ButtonPressed(PSB_PAD_UP) || ps2x.ButtonPressed(PSB_PAD_DOWN)) speedScale = 0;
+    if (ps2x.Button(PSB_PAD_UP) && ps2x.Button(PSB_PAD_DOWN)) slider =2;
     if (ps2x.Button(PSB_PAD_UP)) slider = 1;
     if (ps2x.Button(PSB_PAD_DOWN)) slider = -1;
   }
   else {
+    updateSpeedScale();
     int rawLX = ps2x.Analog(PSS_LX) - 128;
     int rawLY = 128 - ps2x.Analog(PSS_LY);
     int rawRX = ps2x.Analog(PSS_RX) - 128;
@@ -112,8 +115,27 @@ void readGamePad() {
   }
   }
   if (ps2x.Button(PSB_PINK)){
-
+    servo1 = 1;
   }
+  if (ps2x.Button(PSB_GREEN)){
+    servo1 = -1;
+  }
+  if (!ps2x.Button(PSB_PINK) && !ps2x.Button(PSB_GREEN)){
+    servo1 = 0;
+    pwm.setPin(SERVO_1_CHANNEL,MAX_PWM/2);
+  }
+
+  if (ps2x.Button(PSB_BLUE)){
+    servo2 = 1;
+  }
+  if (ps2x.Button(PSB_RED)){
+    servo2 = -1;
+  }
+  if (!ps2x.Button(PSB_BLUE) && !ps2x.Button(PSB_RED)){
+    servo2 = 0;
+    pwm.setPin(SERVO_2_CHANNEL,MAX_PWM/2);
+  }
+
   Serial.print("SpeedScale: "); Serial.println(speedScale);
   Serial.print("LX: "); Serial.println(lx);
   Serial.print("LY: "); Serial.println(ly);
@@ -137,8 +159,8 @@ void controlMotor() {
   Serial.print("m2: "); Serial.println(m2);
   Serial.print("m3: "); Serial.println(m3);
   // Motor 1
-  if (slider == 1) {
-    pwm.setPin(motor4[0],MAX_PWM/2);
+  if (slider >= 1) {
+    pwm.setPin(motor4[0],slider*MAX_PWM/2);
     pwm.setPin(motor4[1],0);
   }
   if (slider == -1){
@@ -169,6 +191,25 @@ void controlMotor() {
   } else {
     pwm.setPin(motor3[0], map(abs(m3), 0, 255, 0, MAX_PWM));
     pwm.setPin(motor3[1], 0);
+  }
+}
+
+void controlServo(){
+  switch (servo1){
+  case 1:
+    pwm.setPin(SERVO_1_CHANNEL, CW);
+    break;
+  case -1:
+    pwm.setPin(SERVO_1_CHANNEL, CCW);
+    break;
+  }
+  switch (servo2){
+  case 1:
+    pwm.setPin(SERVO_2_CHANNEL, CW);
+    break;
+  case -1:
+    pwm.setPin(SERVO_2_CHANNEL, CCW);
+    break;
   }
 }
 
