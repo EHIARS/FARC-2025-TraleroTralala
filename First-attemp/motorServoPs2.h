@@ -21,10 +21,9 @@
 #define PS2_CMD 13
 #define PS2_SEL 15
 #define PS2_CLK 14
-#define MAX_PWM 4059
 
-#define CCW 3045
-#define CW 1015
+#define CCW 2400
+#define CW 600
 // Declare variables as extern (they will be defined in a .cpp file)
 extern int motor1[2];
 extern int motor2[2]; 
@@ -87,14 +86,6 @@ void readGamePad() {
     slider = 0;
     pwm.setPin(motor4[0], 0);
     pwm.setPin(motor4[1], 0);
-  }
-  else if (ps2x.Button(PSB_PAD_UP) || ps2x.Button(PSB_PAD_DOWN)){
-    if (ps2x.ButtonPressed(PSB_PAD_UP) || ps2x.ButtonPressed(PSB_PAD_DOWN)) speedScale = 0;
-    if (ps2x.Button(PSB_PAD_UP) && ps2x.Button(PSB_PAD_DOWN)) slider =4;
-    if (ps2x.Button(PSB_PAD_UP)) slider = 2;
-    if (ps2x.Button(PSB_PAD_DOWN)) slider = -1;
-  }
-  else {
     updateSpeedScale();
     int rawLX = ps2x.Analog(PSS_LX) - 128;
     int rawLY = 128 - ps2x.Analog(PSS_LY);
@@ -112,8 +103,19 @@ void readGamePad() {
     if ((lx * rawLX < 0) || (ly * rawLY < 0)) {
     speedScale -= 0.2;
     if (speedScale < 0) speedScale = 0;
+    }
   }
+  else //(ps2x.Button(PSB_PAD_UP) || ps2x.Button(PSB_PAD_DOWN)){
+  {  
+    if (ps2x.ButtonPressed(PSB_PAD_UP) || ps2x.ButtonPressed(PSB_PAD_DOWN)) speedScale = 0;
+    if (ps2x.Button(PSB_PAD_UP) && ps2x.Button(PSB_PAD_DOWN)) slider =4;
+    else{
+      if (ps2x.Button(PSB_PAD_UP)) slider = 2;
+      if (ps2x.Button(PSB_PAD_DOWN)) slider = -1;
+    }
   }
+    
+  
   if (ps2x.Button(PSB_PINK)){
     servo1 = 1;
   }
@@ -122,7 +124,6 @@ void readGamePad() {
   }
   if (!ps2x.Button(PSB_PINK) && !ps2x.Button(PSB_GREEN)){
     servo1 = 0;
-    pwm.setPin(SERVO_1_CHANNEL,MAX_PWM/2);
   }
 
   if (ps2x.Button(PSB_BLUE)){
@@ -133,7 +134,6 @@ void readGamePad() {
   }
   if (!ps2x.Button(PSB_BLUE) && !ps2x.Button(PSB_RED)){
     servo2 = 0;
-    pwm.setPin(SERVO_2_CHANNEL,MAX_PWM/2);
   }
 
   Serial.print("SpeedScale: "); Serial.println(speedScale);
@@ -197,19 +197,23 @@ void controlMotor() {
 void controlServo(){
   switch (servo1){
   case 1:
-    pwm.setPin(SERVO_1_CHANNEL, CW);
+    pwm.writeMicroseconds(SERVO_1_CHANNEL, CW);
     break;
   case -1:
-    pwm.setPin(SERVO_1_CHANNEL, CCW);
+    pwm.writeMicroseconds(SERVO_1_CHANNEL, CCW);
     break;
+  default:
+    pwm.writeMicroseconds(SERVO_1_CHANNEL, 1480);
   }
   switch (servo2){
   case 1:
-    pwm.setPin(SERVO_2_CHANNEL, CW);
+    pwm.writeMicroseconds(SERVO_2_CHANNEL, CW);
     break;
   case -1:
-    pwm.setPin(SERVO_2_CHANNEL, CCW);
+    pwm.writeMicroseconds(SERVO_2_CHANNEL, CCW);
     break;
+  default:
+    pwm.writeMicroseconds(SERVO_2_CHANNEL, 1480);
   }
 }
 
