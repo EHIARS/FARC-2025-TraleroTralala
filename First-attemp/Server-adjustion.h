@@ -28,7 +28,7 @@ void setupWiFi() {
   
   int attempts = 0;
   while (WiFi.status() != WL_CONNECTED && attempts < 10) {
-    delay(500);
+    delay(50);
     Serial.print(".");
     attempts++;
   }
@@ -69,9 +69,9 @@ void handleGetConfig() {
   doc["rampInterval"] = rampInterval;
   doc["sinr"] = sinr;
   doc["cosr"] = cosr;
-  doc["m1"] = m1;
-  doc["m2"] = m2;
-  doc["m3"] = m3;
+  doc["m1"] = pwm.getPWM(motor1[0])-pwm.getPWM(motor1[1]);
+  doc["m2"] = pwm.getPWM(motor2[0])-pwm.getPWM(motor2[1]);
+  doc["m3"] = pwm.getPWM(motor3[0])-pwm.getPWM(motor3[1]);
   
   String response;
   serializeJson(doc, response);

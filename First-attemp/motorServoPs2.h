@@ -3,9 +3,6 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <PS2X_lib.h>
 
-#define SERVO_CW   2400     // Quay thuận
-#define SERVO_CCW  600     // Quay ngược
-
 #define SERVO_1_CHANNEL 2
 #define SERVO_2_CHANNEL 3
 #define SERVO_3_CHANNEL 4
@@ -44,6 +41,8 @@ extern float cosr;
 extern unsigned long lastSpeedUpdate;
 extern float m1, m2, m3;
 extern int lx, ly, rx, slider, servo1, servo2, encoder;
+
+
 
 
 int flattenAnalog(int value, int threshold = 10) {
@@ -91,6 +90,10 @@ void readGamePad() {
     int rawLY = 128 - ps2x.Analog(PSS_LY);
     int rawRX = ps2x.Analog(PSS_RX) - 128;
 
+    if ((lx * rawLX < 0) || (ly * rawLY < 0)) {
+    speedScale -= 0.2;
+    if (speedScale < 0) speedScale = 0;
+    }
     rawLX = limitInput(rawLX, speedScale);
     rawLY = limitInput(rawLY, speedScale);
     rawRX = limitInput(rawRX, speedScale);
@@ -98,17 +101,11 @@ void readGamePad() {
     lx = flattenAnalog(rawLX) * speedScale;
     ly = flattenAnalog(rawLY) * speedScale;
     rx = flattenAnalog(rawRX) * speedScale;
-
-    // Giảm tốc nếu đổi hướng đột ngột
-    if ((lx * rawLX < 0) || (ly * rawLY < 0)) {
-    speedScale -= 0.2;
-    if (speedScale < 0) speedScale = 0;
-    }
   }
   else //(ps2x.Button(PSB_PAD_UP) || ps2x.Button(PSB_PAD_DOWN)){
   {  
-    if (ps2x.ButtonPressed(PSB_PAD_UP) || ps2x.ButtonPressed(PSB_PAD_DOWN)) speedScale = 0;
-    if (ps2x.Button(PSB_PAD_UP) && ps2x.Button(PSB_PAD_DOWN)) slider =4;
+    //if (ps2x.ButtonPressed(PSB_PAD_UP) || ps2x.ButtonPressed(PSB_PAD_DOWN)) speedScale = 0;
+    if (ps2x.Button(PSB_PAD_UP) && ps2x.Button(PSB_PAD_DOWN)) slider =2;
     else{
       if (ps2x.Button(PSB_PAD_UP)) slider = 2;
       if (ps2x.Button(PSB_PAD_DOWN)) slider = -1;
@@ -159,11 +156,18 @@ void controlMotor() {
   Serial.print("m2: "); Serial.println(m2);
   Serial.print("m3: "); Serial.println(m3);
   // Motor 1
-  if (slider >= 1 && !digitalRead(36)) {
-    pwm.setPin(motor4[0],slider*MAX_PWM/5);
+  if (slider == 2){
+    pwm.setPin(motor4[0],MAX_PWM);
+    pwm.setPin(motor4[1],0);
+    delay(5000);
+    pwm.setPin(motor4[0],0);
     pwm.setPin(motor4[1],0);
   }
-  if (slider == -1){
+  if (slider == 1 && !digitalRead(36)) {
+    pwm.setPin(motor4[0],MAX_PWM/5);
+    pwm.setPin(motor4[1],0);
+  }
+  if (slider == -1 ){
     pwm.setPin(motor4[1],MAX_PWM/2);
     pwm.setPin(motor4[0],0);
   }
@@ -197,7 +201,7 @@ void controlMotor() {
 void controlServo(){
   switch (servo1){
   case 1:
-    pwm.writeMicroseconds(SERVO_1_CHANNEL, CW);
+    pwm.writeMicroseconds(SERVO_1_CHANNEL, CW );
     break;
   case -1:
     pwm.writeMicroseconds(SERVO_1_CHANNEL, CCW);
